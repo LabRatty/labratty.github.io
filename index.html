@@ -62,7 +62,7 @@
         background: #ffffff;
         opacity: 0.9;
         transform: translateY(-50%);
-        z-index: 3;
+        z-index: 5;
         border-radius: 999px;
     }
 
@@ -72,7 +72,48 @@
         width: 100%;
         height: 0%;
         z-index: 2;
+        border-radius: 999px 999px 0 0;
         transition: height 0.5s ease, top 0.5s ease, bottom 0.5s ease, background 0.5s ease;
+    }
+
+    .chevron-layer {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 50%;
+        z-index: 4;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .chevron-layer.export {
+        bottom: 50%;
+    }
+
+    .chevron-layer.import {
+        top: 50%;
+    }
+
+    .chevron {
+        position: absolute;
+        left: 50%;
+        width: 24px;
+        height: 24px;
+        transform: translateX(-50%) rotate(45deg);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .chevron.export {
+        border-left: 5px solid #22c55e;
+        border-top: 5px solid #22c55e;
+        filter: drop-shadow(0 0 5px rgba(34, 197, 94, 0.8));
+    }
+
+    .chevron.import {
+        border-right: 5px solid #ef4444;
+        border-bottom: 5px solid #ef4444;
+        filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.8));
     }
 
     .content {
@@ -173,6 +214,23 @@
     <div class="net-panel">
         <div class="net-track">
             <div class="net-fill" id="netFill"></div>
+
+            <div class="chevron-layer export" id="exportChevrons">
+                <div class="chevron export"></div>
+                <div class="chevron export"></div>
+                <div class="chevron export"></div>
+                <div class="chevron export"></div>
+                <div class="chevron export"></div>
+            </div>
+
+            <div class="chevron-layer import" id="importChevrons">
+                <div class="chevron import"></div>
+                <div class="chevron import"></div>
+                <div class="chevron import"></div>
+                <div class="chevron import"></div>
+                <div class="chevron import"></div>
+            </div>
+
             <div class="net-zero-line"></div>
         </div>
     </div>
@@ -248,10 +306,7 @@ function clamp(value, min, max) {
 }
 
 async function loadLatest() {
-
-    const response = await fetch(
-        `./latest.json?t=${Date.now()}`
-    );
+    const response = await fetch(`./latest.json?t=${Date.now()}`);
 
     if (!response.ok) {
         throw new Error("Failed to load latest.json");
@@ -261,10 +316,7 @@ async function loadLatest() {
 }
 
 async function loadSolarHistory() {
-
-    const response = await fetch(
-        `./solar_today.json?t=${Date.now()}`
-    );
+    const response = await fetch(`./solar_today.json?t=${Date.now()}`);
 
     if (!response.ok) {
         throw new Error("Failed to load solar_today.json");
@@ -274,7 +326,6 @@ async function loadSolarHistory() {
 }
 
 function updateTop(data) {
-
     document.getElementById("solar").innerText =
         formatKW(data.solar_kw);
 
@@ -287,12 +338,9 @@ function updateTop(data) {
     const status = document.getElementById("gridStatus");
 
     if (data.grid_status === "Exporting") {
-
         status.innerText = "Exporting";
         status.style.color = "#31f06c";
-
     } else {
-
         status.innerText = "Importing";
         status.style.color = "#ff4b4b";
     }
@@ -300,8 +348,47 @@ function updateTop(data) {
     updateNetBar(data.net_grid_kw);
 }
 
-function updateNetBar(net) {
+function updateChevrons(net, percent) {
+    const exportChevrons = Array.from(
+        document.querySelectorAll("#exportChevrons .chevron")
+    );
 
+    const importChevrons = Array.from(
+        document.querySelectorAll("#importChevrons .chevron")
+    );
+
+    exportChevrons.forEach(chevron => {
+        chevron.style.opacity = "0";
+    });
+
+    importChevrons.forEach(chevron => {
+        chevron.style.opacity = "0";
+    });
+
+    const activeCount = Math.floor(percent / 10);
+
+    if (activeCount <= 0) {
+        return;
+    }
+
+    if (net >= 0) {
+        exportChevrons.forEach((chevron, index) => {
+            if (index < activeCount) {
+                chevron.style.opacity = "0.9";
+                chevron.style.bottom = `${12 + index * 28}px`;
+            }
+        });
+    } else {
+        importChevrons.forEach((chevron, index) => {
+            if (index < activeCount) {
+                chevron.style.opacity = "0.9";
+                chevron.style.top = `${12 + index * 28}px`;
+            }
+        });
+    }
+}
+
+function updateNetBar(net) {
     const fill = document.getElementById("netFill");
 
     const limitedNet = clamp(net, -3, 3);
@@ -311,20 +398,19 @@ function updateNetBar(net) {
     fill.style.height = `${percent}%`;
 
     if (limitedNet >= 0) {
-
         fill.style.bottom = "50%";
         fill.style.top = "auto";
+        fill.style.borderRadius = "999px 999px 0 0";
 
         fill.style.background =
             "linear-gradient(to top, #facc15 0%, #a3e635 45%, #22c55e 100%)";
 
         fill.style.boxShadow =
             "0 0 14px rgba(34, 197, 94, 0.75)";
-
     } else {
-
         fill.style.top = "50%";
         fill.style.bottom = "auto";
+        fill.style.borderRadius = "0 0 999px 999px";
 
         fill.style.background =
             "linear-gradient(to bottom, #f97316 0%, #fb4b2b 45%, #ef4444 100%)";
@@ -332,16 +418,14 @@ function updateNetBar(net) {
         fill.style.boxShadow =
             "0 0 14px rgba(239, 68, 68, 0.75)";
     }
+
+    updateChevrons(limitedNet, percent);
 }
 
 function drawSolarChart(points) {
-
     const canvas = document.getElementById("solarChart");
-
     const ctx = canvas.getContext("2d");
-
     const rect = canvas.getBoundingClientRect();
-
     const dpr = window.devicePixelRatio || 1;
 
     canvas.width = rect.width * dpr;
@@ -374,21 +458,12 @@ function drawSolarChart(points) {
     const totalHours = endHour - startHour;
 
     function xForTime(dateObj) {
-
-        const hours =
-            dateObj.getHours() +
-            dateObj.getMinutes() / 60;
-
-        return padding.left +
-            ((hours - startHour) / totalHours) *
-            chartWidth;
+        const hours = dateObj.getHours() + dateObj.getMinutes() / 60;
+        return padding.left + ((hours - startHour) / totalHours) * chartWidth;
     }
 
     function yForValue(value) {
-
-        return padding.top +
-            chartHeight -
-            (value / maxKw) * chartHeight;
+        return padding.top + chartHeight - (value / maxKw) * chartHeight;
     }
 
     ctx.strokeStyle = "#3a404c";
@@ -397,7 +472,6 @@ function drawSolarChart(points) {
     ctx.font = "14px Arial";
 
     for (let i = 0; i <= maxKw; i++) {
-
         const y = yForValue(i);
 
         ctx.beginPath();
@@ -409,11 +483,7 @@ function drawSolarChart(points) {
     }
 
     for (let hour = 5; hour <= 21; hour += 2) {
-
-        const x =
-            padding.left +
-            ((hour - startHour) / totalHours) *
-            chartWidth;
+        const x = padding.left + ((hour - startHour) / totalHours) * chartWidth;
 
         ctx.fillText(
             `${hour}:00`,
@@ -429,7 +499,6 @@ function drawSolarChart(points) {
     ctx.beginPath();
 
     points.forEach((point, index) => {
-
         const dateObj = new Date(point.time);
 
         const x = xForTime(dateObj);
@@ -465,15 +534,8 @@ function drawSolarChart(points) {
             padding.top + chartHeight
         );
 
-    gradient.addColorStop(
-        0,
-        "rgba(36, 184, 90, 0.75)"
-    );
-
-    gradient.addColorStop(
-        1,
-        "rgba(36, 184, 90, 0.08)"
-    );
+    gradient.addColorStop(0, "rgba(36, 184, 90, 0.75)");
+    gradient.addColorStop(1, "rgba(36, 184, 90, 0.08)");
 
     ctx.fillStyle = gradient;
     ctx.fill();
@@ -481,7 +543,6 @@ function drawSolarChart(points) {
     ctx.beginPath();
 
     points.forEach((point, index) => {
-
         const dateObj = new Date(point.time);
 
         const x = xForTime(dateObj);
@@ -500,9 +561,7 @@ function drawSolarChart(points) {
 }
 
 async function refreshDashboard() {
-
     try {
-
         const latest =
             await loadLatest();
 
@@ -518,7 +577,6 @@ async function refreshDashboard() {
         document.getElementById("errorBox").innerText = "";
 
     } catch (error) {
-
         console.error(error);
 
         document.getElementById("errorBox").innerText =
