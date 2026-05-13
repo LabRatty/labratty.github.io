@@ -77,7 +77,8 @@ body {
         height 0.5s ease,
         top 0.5s ease,
         bottom 0.5s ease,
-        background 0.5s ease;
+        background 0.5s ease,
+        box-shadow 0.5s ease;
 }
 
 .chevron-container {
@@ -202,13 +203,9 @@ canvas {
 <div class="container">
 
     <div class="net-panel">
-
         <div class="net-track">
-
             <div class="net-fill" id="netFill">
-
                 <div class="chevron-container">
-
                     <div class="chevron export"></div>
                     <div class="chevron export"></div>
                     <div class="chevron export"></div>
@@ -218,15 +215,11 @@ canvas {
                     <div class="chevron import"></div>
                     <div class="chevron import"></div>
                     <div class="chevron import"></div>
-
                 </div>
-
             </div>
 
             <div class="net-zero-line"></div>
-
         </div>
-
     </div>
 
     <div class="content">
@@ -234,7 +227,6 @@ canvas {
         <div class="top-row">
 
             <div class="tile">
-
                 <div class="status-spacer"></div>
 
                 <svg class="icon icon-solar" viewBox="0 0 64 64" fill="none">
@@ -250,11 +242,9 @@ canvas {
                 </svg>
 
                 <div class="value" id="solar">--</div>
-
             </div>
 
             <div class="tile">
-
                 <div class="status-spacer"></div>
 
                 <svg class="icon icon-home" viewBox="0 0 64 64" fill="none">
@@ -264,11 +254,9 @@ canvas {
                 </svg>
 
                 <div class="value" id="home">--</div>
-
             </div>
 
             <div class="tile">
-
                 <div class="grid-status" id="gridStatus">--</div>
 
                 <svg class="icon icon-grid" viewBox="0 0 64 64" fill="none">
@@ -282,7 +270,6 @@ canvas {
                 </svg>
 
                 <div class="value" id="grid">--</div>
-
             </div>
 
         </div>
@@ -309,24 +296,67 @@ function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
+function lerp(a, b, t) {
+    return a + (b - a) * t;
+}
+
+function lerpColor(colorA, colorB, t) {
+    return {
+        r: Math.round(lerp(colorA.r, colorB.r, t)),
+        g: Math.round(lerp(colorA.g, colorB.g, t)),
+        b: Math.round(lerp(colorA.b, colorB.b, t))
+    };
+}
+
+function rgbString(color) {
+    return `rgb(${color.r}, ${color.g}, ${color.b})`;
+}
+
+function rgbaString(color, alpha) {
+    return `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`;
+}
+
+function colorForNetKW(netKw) {
+    const red = { r: 239, g: 68, b: 68 };
+    const orange = { r: 249, g: 115, b: 22 };
+    const yellow = { r: 250, g: 204, b: 21 };
+    const yellowGreen = { r: 190, g: 230, b: 45 };
+    const green = { r: 34, g: 197, b: 94 };
+
+    if (netKw <= -2) {
+        return red;
+    }
+
+    if (netKw < -1) {
+        return lerpColor(red, orange, (netKw + 2) / 1);
+    }
+
+    if (netKw < 0) {
+        return lerpColor(orange, yellow, (netKw + 1) / 1);
+    }
+
+    if (netKw < 1) {
+        return lerpColor(yellow, yellowGreen, netKw / 1);
+    }
+
+    if (netKw < 2.5) {
+        return lerpColor(yellowGreen, green, (netKw - 1) / 1.5);
+    }
+
+    return green;
+}
+
 async function loadLatest() {
-
-    const response =
-        await fetch(`./latest.json?t=${Date.now()}`);
-
+    const response = await fetch(`./latest.json?t=${Date.now()}`);
     return await response.json();
 }
 
 async function loadSolarHistory() {
-
-    const response =
-        await fetch(`./solar_today.json?t=${Date.now()}`);
-
+    const response = await fetch(`./solar_today.json?t=${Date.now()}`);
     return await response.json();
 }
 
 function updateTop(data) {
-
     document.getElementById("solar").innerText =
         formatWattsAsKW(data.solar_kw);
 
@@ -336,16 +366,12 @@ function updateTop(data) {
     document.getElementById("grid").innerText =
         formatWattsAsKW(data.grid_kw);
 
-    const status =
-        document.getElementById("gridStatus");
+    const status = document.getElementById("gridStatus");
 
     if (data.grid_status === "Exporting") {
-
         status.innerText = "Exporting";
         status.style.color = "#31f06c";
-
     } else {
-
         status.innerText = "Importing";
         status.style.color = "#ff4b4b";
     }
@@ -354,73 +380,43 @@ function updateTop(data) {
 }
 
 function updateNetBar(netKw) {
+    const fill = document.getElementById("netFill");
 
-    const fill =
-        document.getElementById("netFill");
+    const limitedNet = clamp(netKw, -3, 3);
+    const percent = Math.abs(limitedNet) / 3 * 50;
+    const color = colorForNetKW(limitedNet);
 
-    const limitedNet =
-        clamp(netKw, -3, 3);
+    fill.style.height = `${percent}%`;
+    fill.style.background = rgbString(color);
+    fill.style.boxShadow = `0 0 18px ${rgbaString(color, 0.8)}`;
 
-    const percent =
-        Math.abs(limitedNet) / 3 * 50;
-
-    fill.style.height =
-        `${percent}%`;
-
-    const exportChevrons =
-        document.querySelectorAll(".chevron.export");
-
-    const importChevrons =
-        document.querySelectorAll(".chevron.import");
+    const exportChevrons = document.querySelectorAll(".chevron.export");
+    const importChevrons = document.querySelectorAll(".chevron.import");
 
     exportChevrons.forEach(c => c.style.opacity = "0");
     importChevrons.forEach(c => c.style.opacity = "0");
 
-    const chevronCount =
-        Math.max(1, Math.floor(percent / 10));
+    const chevronCount = Math.max(1, Math.floor(percent / 10));
 
     if (limitedNet >= 0) {
-
         fill.style.bottom = "50%";
         fill.style.top = "auto";
-
-        fill.style.borderRadius =
-            "999px 999px 0 0";
-
-        fill.style.background =
-            "linear-gradient(to top, #facc15 0%, #a3e635 45%, #22c55e 100%)";
-
-        fill.style.boxShadow =
-            "0 0 14px rgba(34, 197, 94, 0.75)";
+        fill.style.borderRadius = "999px 999px 0 0";
 
         exportChevrons.forEach((c, i) => {
-
-            c.style.bottom =
-                `${10 + (i * 26)}px`;
+            c.style.bottom = `${10 + (i * 26)}px`;
 
             if (i < chevronCount) {
                 c.style.opacity = "0.95";
             }
         });
-
     } else {
-
         fill.style.top = "50%";
         fill.style.bottom = "auto";
-
-        fill.style.borderRadius =
-            "0 0 999px 999px";
-
-        fill.style.background =
-            "linear-gradient(to bottom, #f97316 0%, #fb4b2b 45%, #ef4444 100%)";
-
-        fill.style.boxShadow =
-            "0 0 14px rgba(239, 68, 68, 0.75)";
+        fill.style.borderRadius = "0 0 999px 999px";
 
         importChevrons.forEach((c, i) => {
-
-            c.style.top =
-                `${10 + (i * 26)}px`;
+            c.style.top = `${10 + (i * 26)}px`;
 
             if (i < chevronCount) {
                 c.style.opacity = "0.95";
@@ -430,24 +426,13 @@ function updateNetBar(netKw) {
 }
 
 function drawSolarChart(points) {
+    const canvas = document.getElementById("solarChart");
+    const ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
 
-    const canvas =
-        document.getElementById("solarChart");
-
-    const ctx =
-        canvas.getContext("2d");
-
-    const rect =
-        canvas.getBoundingClientRect();
-
-    const dpr =
-        window.devicePixelRatio || 1;
-
-    canvas.width =
-        rect.width * dpr;
-
-    canvas.height =
-        rect.height * dpr;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
@@ -463,35 +448,22 @@ function drawSolarChart(points) {
         bottom: 36
     };
 
-    const chartWidth =
-        width - padding.left - padding.right;
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
 
-    const chartHeight =
-        height - padding.top - padding.bottom;
+    const solarKwValues = points.map(p => wattsToKW(p.solar_kw));
 
-    const solarKwValues =
-        points.map(p => wattsToKW(p.solar_kw));
-
-    const maxKw =
-        Math.max(
-            1,
-            Math.ceil(
-                Math.max(
-                    ...solarKwValues,
-                    1
-                )
-            )
-        );
+    const maxKw = Math.max(
+        1,
+        Math.ceil(Math.max(...solarKwValues, 1))
+    );
 
     const startHour = 5;
     const endHour = 21;
     const totalHours = endHour - startHour;
 
     function xForTime(dateObj) {
-
-        const hours =
-            dateObj.getHours() +
-            dateObj.getMinutes() / 60;
+        const hours = dateObj.getHours() + dateObj.getMinutes() / 60;
 
         return padding.left +
             ((hours - startHour) / totalHours) *
@@ -499,7 +471,6 @@ function drawSolarChart(points) {
     }
 
     function yForValue(valueKw) {
-
         return padding.top +
             chartHeight -
             (valueKw / maxKw) * chartHeight;
@@ -511,7 +482,6 @@ function drawSolarChart(points) {
     ctx.font = "14px Arial";
 
     for (let i = 0; i <= maxKw; i++) {
-
         const y = yForValue(i);
 
         ctx.beginPath();
@@ -523,17 +493,12 @@ function drawSolarChart(points) {
     }
 
     for (let hour = 5; hour <= 21; hour += 2) {
-
         const x =
             padding.left +
             ((hour - startHour) / totalHours) *
             chartWidth;
 
-        ctx.fillText(
-            `${hour}:00`,
-            x - 18,
-            height - 10
-        );
+        ctx.fillText(`${hour}:00`, x - 18, height - 10);
     }
 
     if (points.length === 0) {
@@ -543,15 +508,9 @@ function drawSolarChart(points) {
     ctx.beginPath();
 
     points.forEach((point, index) => {
-
-        const dateObj =
-            new Date(point.time);
-
-        const x =
-            xForTime(dateObj);
-
-        const y =
-            yForValue(wattsToKW(point.solar_kw));
+        const dateObj = new Date(point.time);
+        const x = xForTime(dateObj);
+        const y = yForValue(wattsToKW(point.solar_kw));
 
         if (index === 0) {
             ctx.moveTo(x, y);
@@ -560,11 +519,8 @@ function drawSolarChart(points) {
         }
     });
 
-    const lastPoint =
-        points[points.length - 1];
-
-    const firstPoint =
-        points[0];
+    const lastPoint = points[points.length - 1];
+    const firstPoint = points[0];
 
     ctx.lineTo(
         xForTime(new Date(lastPoint.time)),
@@ -578,23 +534,15 @@ function drawSolarChart(points) {
 
     ctx.closePath();
 
-    const gradient =
-        ctx.createLinearGradient(
-            0,
-            padding.top,
-            0,
-            padding.top + chartHeight
-        );
-
-    gradient.addColorStop(
+    const gradient = ctx.createLinearGradient(
         0,
-        "rgba(36, 184, 90, 0.75)"
+        padding.top,
+        0,
+        padding.top + chartHeight
     );
 
-    gradient.addColorStop(
-        1,
-        "rgba(36, 184, 90, 0.08)"
-    );
+    gradient.addColorStop(0, "rgba(36, 184, 90, 0.75)");
+    gradient.addColorStop(1, "rgba(36, 184, 90, 0.08)");
 
     ctx.fillStyle = gradient;
     ctx.fill();
@@ -602,15 +550,9 @@ function drawSolarChart(points) {
     ctx.beginPath();
 
     points.forEach((point, index) => {
-
-        const dateObj =
-            new Date(point.time);
-
-        const x =
-            xForTime(dateObj);
-
-        const y =
-            yForValue(wattsToKW(point.solar_kw));
+        const dateObj = new Date(point.time);
+        const x = xForTime(dateObj);
+        const y = yForValue(wattsToKW(point.solar_kw));
 
         if (index === 0) {
             ctx.moveTo(x, y);
@@ -625,25 +567,15 @@ function drawSolarChart(points) {
 }
 
 async function refreshDashboard() {
-
     try {
-
-        const latest =
-            await loadLatest();
-
-        const solarHistory =
-            await loadSolarHistory();
+        const latest = await loadLatest();
+        const solarHistory = await loadSolarHistory();
 
         updateTop(latest);
-
-        drawSolarChart(
-            solarHistory.points || []
-        );
+        drawSolarChart(solarHistory.points || []);
 
         document.getElementById("errorBox").innerText = "";
-
     } catch (error) {
-
         console.error(error);
 
         document.getElementById("errorBox").innerText =
