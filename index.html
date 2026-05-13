@@ -356,6 +356,11 @@ async function loadSolarHistory() {
     return await response.json();
 }
 
+async function loadSunTimes() {
+    const response = await fetch(`./sun_times.json?t=${Date.now()}`);
+    return await response.json();
+}
+
 function updateTop(data) {
     document.getElementById("solar").innerText =
         formatWattsAsKW(data.solar_kw);
@@ -425,7 +430,38 @@ function updateNetBar(netKw) {
     }
 }
 
-function drawSolarChart(points) {
+function drawSunIcon(ctx, x, y, radius) {
+    ctx.save();
+
+    ctx.strokeStyle = "#facc15";
+    ctx.fillStyle = "#facc15";
+    ctx.lineWidth = 2;
+
+    for (let i = 0; i < 12; i++) {
+        const angle = (Math.PI * 2 * i) / 12;
+        const inner = radius + 4;
+        const outer = radius + 10;
+
+        ctx.beginPath();
+        ctx.moveTo(
+            x + Math.cos(angle) * inner,
+            y + Math.sin(angle) * inner
+        );
+        ctx.lineTo(
+            x + Math.cos(angle) * outer,
+            y + Math.sin(angle) * outer
+        );
+        ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+function drawSolarChart(points, sunTimes) {
     const canvas = document.getElementById("solarChart");
     const ctx = canvas.getContext("2d");
     const rect = canvas.getBoundingClientRect();
@@ -444,7 +480,7 @@ function drawSolarChart(points) {
     const padding = {
         left: 54,
         right: 18,
-        top: 16,
+        top: 26,
         bottom: 36
     };
 
@@ -476,6 +512,59 @@ function drawSolarChart(points) {
             (valueKw / maxKw) * chartHeight;
     }
 
+    function drawSunMarkers() {
+        if (!sunTimes || !sunTimes.ok) {
+            return;
+        }
+
+        const sunriseDate = sunTimes.sunrise ? new Date(sunTimes.sunrise) : null;
+        const sunsetDate = sunTimes.sunset ? new Date(sunTimes.sunset) : null;
+
+        const chartTop = padding.top;
+        const chartBottom = padding.top + chartHeight;
+
+        if (sunriseDate && !Number.isNaN(sunriseDate.getTime())) {
+            const sunriseX = xForTime(sunriseDate);
+
+            if (sunriseX >= padding.left && sunriseX <= width - padding.right) {
+                ctx.save();
+
+                ctx.strokeStyle = "rgba(250, 204, 21, 0.9)";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 7]);
+
+                ctx.beginPath();
+                ctx.moveTo(sunriseX, chartTop + 8);
+                ctx.lineTo(sunriseX, chartBottom);
+                ctx.stroke();
+
+                ctx.setLineDash([]);
+                drawSunIcon(ctx, sunriseX, chartTop + 4, 6);
+
+                ctx.restore();
+            }
+        }
+
+        if (sunsetDate && !Number.isNaN(sunsetDate.getTime())) {
+            const sunsetX = xForTime(sunsetDate);
+
+            if (sunsetX >= padding.left && sunsetX <= width - padding.right) {
+                ctx.save();
+
+                ctx.fillStyle = "#f97316";
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
+                ctx.lineWidth = 2;
+
+                ctx.beginPath();
+                ctx.arc(sunsetX, chartBottom, 7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.restore();
+            }
+        }
+    }
+
     ctx.strokeStyle = "#3a404c";
     ctx.lineWidth = 1;
     ctx.fillStyle = "#9aa3b2";
@@ -500,6 +589,8 @@ function drawSolarChart(points) {
 
         ctx.fillText(`${hour}:00`, x - 18, height - 10);
     }
+
+    drawSunMarkers();
 
     if (points.length === 0) {
         return;
@@ -570,9 +661,14 @@ async function refreshDashboard() {
     try {
         const latest = await loadLatest();
         const solarHistory = await loadSolarHistory();
+        const sunTimes = await loadSunTimes();
 
         updateTop(latest);
-        drawSolarChart(solarHistory.points || []);
+
+        drawSolarChart(
+            solarHistory.points || [],
+            sunTimes
+        );
 
         document.getElementById("errorBox").innerText = "";
     } catch (error) {
