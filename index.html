@@ -513,43 +513,120 @@ function drawSolarChart(points, sunTimes) {
     }
 
     function drawSunMarkers() {
-        if (sunsetDate && !Number.isNaN(sunsetDate.getTime())) {
-    const sunsetX = xForTime(sunsetDate);
+        function drawSunMarkers() {
 
-    if (sunsetX >= padding.left && sunsetX <= width - padding.right) {
-        ctx.save();
+    if (!sunTimes || !sunTimes.ok) {
+        return;
+    }
 
-        const radius = 8;
-        const baseY = chartBottom;
+    const sunriseDate =
+        sunTimes.sunrise
+            ? new Date(sunTimes.sunrise)
+            : null;
 
-        ctx.strokeStyle = "#f97316";
-        ctx.fillStyle = "#f97316";
-        ctx.lineWidth = 2;
+    const sunsetDate =
+        sunTimes.sunset
+            ? new Date(sunTimes.sunset)
+            : null;
 
-        for (let i = 0; i <= 8; i++) {
-            const angle = Math.PI + (Math.PI * i) / 8;
-            const inner = radius + 4;
-            const outer = radius + 10;
+    const chartTop = padding.top;
+    const chartBottom = padding.top + chartHeight;
+
+    if (sunriseDate && !Number.isNaN(sunriseDate.getTime())) {
+
+        const sunriseX = xForTime(sunriseDate);
+
+        if (
+            sunriseX >= padding.left &&
+            sunriseX <= width - padding.right
+        ) {
+
+            ctx.save();
+
+            ctx.strokeStyle = "rgba(250, 204, 21, 0.9)";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 7]);
 
             ctx.beginPath();
-            ctx.moveTo(
-                sunsetX + Math.cos(angle) * inner,
-                baseY + Math.sin(angle) * inner
-            );
-            ctx.lineTo(
-                sunsetX + Math.cos(angle) * outer,
-                baseY + Math.sin(angle) * outer
-            );
+            ctx.moveTo(sunriseX, chartTop + 8);
+            ctx.lineTo(sunriseX, chartBottom);
             ctx.stroke();
+
+            ctx.setLineDash([]);
+
+            drawSunIcon(
+                ctx,
+                sunriseX,
+                chartTop + 4,
+                6
+            );
+
+            ctx.restore();
         }
+    }
 
-        ctx.beginPath();
-        ctx.arc(sunsetX, baseY, radius, Math.PI, 0, false);
-        ctx.lineTo(sunsetX - radius, baseY);
-        ctx.closePath();
-        ctx.fill();
+    if (sunsetDate && !Number.isNaN(sunsetDate.getTime())) {
 
-        ctx.restore();
+        const sunsetX = xForTime(sunsetDate);
+
+        if (
+            sunsetX >= padding.left &&
+            sunsetX <= width - padding.right
+        ) {
+
+            ctx.save();
+
+            const radius = 8;
+            const baseY = chartBottom;
+
+            ctx.strokeStyle = "#f97316";
+            ctx.fillStyle = "#f97316";
+            ctx.lineWidth = 2;
+
+            for (let i = 0; i <= 8; i++) {
+
+                const angle =
+                    Math.PI + (Math.PI * i) / 8;
+
+                const inner = radius + 4;
+                const outer = radius + 10;
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    sunsetX + Math.cos(angle) * inner,
+                    baseY + Math.sin(angle) * inner
+                );
+
+                ctx.lineTo(
+                    sunsetX + Math.cos(angle) * outer,
+                    baseY + Math.sin(angle) * outer
+                );
+
+                ctx.stroke();
+            }
+
+            ctx.beginPath();
+
+            ctx.arc(
+                sunsetX,
+                baseY,
+                radius,
+                Math.PI,
+                0,
+                false
+            );
+
+            ctx.lineTo(
+                sunsetX - radius,
+                baseY
+            );
+
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
     }
 }
     }
