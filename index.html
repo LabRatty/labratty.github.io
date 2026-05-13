@@ -461,6 +461,39 @@ function drawSunIcon(ctx, x, y, radius) {
     ctx.restore();
 }
 
+function drawSunsetIcon(ctx, x, baseY, radius) {
+    ctx.save();
+
+    ctx.strokeStyle = "#f97316";
+    ctx.fillStyle = "#f97316";
+    ctx.lineWidth = 2;
+
+    for (let i = 0; i <= 8; i++) {
+        const angle = Math.PI + (Math.PI * i) / 8;
+        const inner = radius + 4;
+        const outer = radius + 10;
+
+        ctx.beginPath();
+        ctx.moveTo(
+            x + Math.cos(angle) * inner,
+            baseY + Math.sin(angle) * inner
+        );
+        ctx.lineTo(
+            x + Math.cos(angle) * outer,
+            baseY + Math.sin(angle) * outer
+        );
+        ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.arc(x, baseY, radius, Math.PI, 0, false);
+    ctx.lineTo(x - radius, baseY);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+}
+
 function drawSolarChart(points, sunTimes) {
     const canvas = document.getElementById("solarChart");
     const ctx = canvas.getContext("2d");
@@ -480,8 +513,8 @@ function drawSolarChart(points, sunTimes) {
     const padding = {
         left: 54,
         right: 18,
-        top: 26,
-        bottom: 36
+        top: 30,
+        bottom: 40
     };
 
     const chartWidth = width - padding.left - padding.right;
@@ -513,122 +546,45 @@ function drawSolarChart(points, sunTimes) {
     }
 
     function drawSunMarkers() {
-        function drawSunMarkers() {
-
-    if (!sunTimes || !sunTimes.ok) {
-        return;
-    }
-
-    const sunriseDate =
-        sunTimes.sunrise
-            ? new Date(sunTimes.sunrise)
-            : null;
-
-    const sunsetDate =
-        sunTimes.sunset
-            ? new Date(sunTimes.sunset)
-            : null;
-
-    const chartTop = padding.top;
-    const chartBottom = padding.top + chartHeight;
-
-    if (sunriseDate && !Number.isNaN(sunriseDate.getTime())) {
-
-        const sunriseX = xForTime(sunriseDate);
-
-        if (
-            sunriseX >= padding.left &&
-            sunriseX <= width - padding.right
-        ) {
-
-            ctx.save();
-
-            ctx.strokeStyle = "rgba(250, 204, 21, 0.9)";
-            ctx.lineWidth = 2;
-            ctx.setLineDash([6, 7]);
-
-            ctx.beginPath();
-            ctx.moveTo(sunriseX, chartTop + 8);
-            ctx.lineTo(sunriseX, chartBottom);
-            ctx.stroke();
-
-            ctx.setLineDash([]);
-
-            drawSunIcon(
-                ctx,
-                sunriseX,
-                chartTop + 4,
-                6
-            );
-
-            ctx.restore();
+        if (!sunTimes || !sunTimes.ok) {
+            return;
         }
-    }
 
-    if (sunsetDate && !Number.isNaN(sunsetDate.getTime())) {
+        const sunriseDate = sunTimes.sunrise ? new Date(sunTimes.sunrise) : null;
+        const sunsetDate = sunTimes.sunset ? new Date(sunTimes.sunset) : null;
 
-        const sunsetX = xForTime(sunsetDate);
+        const chartTop = padding.top;
+        const chartBottom = padding.top + chartHeight;
 
-        if (
-            sunsetX >= padding.left &&
-            sunsetX <= width - padding.right
-        ) {
+        if (sunriseDate && !Number.isNaN(sunriseDate.getTime())) {
+            const sunriseX = xForTime(sunriseDate);
 
-            ctx.save();
+            if (sunriseX >= padding.left && sunriseX <= width - padding.right) {
+                ctx.save();
 
-            const radius = 8;
-            const baseY = chartBottom;
-
-            ctx.strokeStyle = "#f97316";
-            ctx.fillStyle = "#f97316";
-            ctx.lineWidth = 2;
-
-            for (let i = 0; i <= 8; i++) {
-
-                const angle =
-                    Math.PI + (Math.PI * i) / 8;
-
-                const inner = radius + 4;
-                const outer = radius + 10;
+                ctx.strokeStyle = "rgba(250, 204, 21, 0.9)";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 7]);
 
                 ctx.beginPath();
-
-                ctx.moveTo(
-                    sunsetX + Math.cos(angle) * inner,
-                    baseY + Math.sin(angle) * inner
-                );
-
-                ctx.lineTo(
-                    sunsetX + Math.cos(angle) * outer,
-                    baseY + Math.sin(angle) * outer
-                );
-
+                ctx.moveTo(sunriseX, chartTop + 10);
+                ctx.lineTo(sunriseX, chartBottom);
                 ctx.stroke();
+
+                ctx.setLineDash([]);
+                drawSunIcon(ctx, sunriseX, chartTop + 5, 6);
+
+                ctx.restore();
             }
-
-            ctx.beginPath();
-
-            ctx.arc(
-                sunsetX,
-                baseY,
-                radius,
-                Math.PI,
-                0,
-                false
-            );
-
-            ctx.lineTo(
-                sunsetX - radius,
-                baseY
-            );
-
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.restore();
         }
-    }
-}
+
+        if (sunsetDate && !Number.isNaN(sunsetDate.getTime())) {
+            const sunsetX = xForTime(sunsetDate);
+
+            if (sunsetX >= padding.left && sunsetX <= width - padding.right) {
+                drawSunsetIcon(ctx, sunsetX, chartBottom, 8);
+            }
+        }
     }
 
     ctx.strokeStyle = "#3a404c";
@@ -727,7 +683,14 @@ async function refreshDashboard() {
     try {
         const latest = await loadLatest();
         const solarHistory = await loadSolarHistory();
-        const sunTimes = await loadSunTimes();
+
+        let sunTimes = null;
+
+        try {
+            sunTimes = await loadSunTimes();
+        } catch (sunError) {
+            console.warn("Sun times unavailable:", sunError);
+        }
 
         updateTop(latest);
 
