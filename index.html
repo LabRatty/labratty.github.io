@@ -588,6 +588,30 @@ function drawSolarChart(points, sunTimes) {
         }
     }
 
+    function drawCurrentTimeMarker() {
+        const now = new Date();
+        const nowX = xForTime(now);
+        const chartTop = padding.top;
+        const chartBottom = padding.top + chartHeight;
+
+        if (nowX < padding.left || nowX > width - padding.right) {
+            return;
+        }
+
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 6]);
+
+        ctx.beginPath();
+        ctx.moveTo(nowX, chartTop);
+        ctx.lineTo(nowX, chartBottom);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        ctx.restore();
+    }
+
     ctx.strokeStyle = "#3a404c";
     ctx.lineWidth = 1;
     ctx.fillStyle = "#9aa3b2";
@@ -614,6 +638,7 @@ function drawSolarChart(points, sunTimes) {
     }
 
     drawSunMarkers();
+    drawCurrentTimeMarker();
 
     if (points.length === 0) {
         return;
