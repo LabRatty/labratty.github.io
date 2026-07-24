@@ -1,10 +1,10 @@
 {
   "ok": true,
-  "updated_at": "2026-07-24T18:17:00.033700+00:00",
-  "data_time": "2026-07-24T18:16:29.347819+00:00",
-  "solar_kw": 2153.12,
-  "home_kw": 1547.04,
-  "grid_kw": -606.08,
-  "net_grid_kw": 606.08,
-  "grid_status": "Exporting"
+  "updated_at": "2026-07-24T18:17:02.821781+00:00",
+  "data_time": "2026-07-24T18:17:00.473832+00:00",
+  "solar_kw": 2221.68,
+  "home_kw": 2769.84,
+  "grid_kw": 548.16,
+  "net_grid_kw": -548.16,
+  "grid_status": "Importing"
 }
