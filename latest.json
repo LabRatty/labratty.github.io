@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "updated_at": "2026-10-07T17:51:32.566641+00:00",
+  "data_time": "2026-10-07T17:51:02.034822+00:00",
+  "solar_kw": 1693.96,
+  "home_kw": 210.04,
+  "grid_kw": -1483.92,
+  "net_grid_kw": 1483.92,
+  "grid_status": "Exporting"
+}
