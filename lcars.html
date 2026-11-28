@@ -1,1 +1,358 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Gothic&display=swap"><style>html,body{margin:0;background:#000;width:100%;height:100%;overflow:hidden}svg{width:100%;height:100%;display:block}text{font-family:'League Gothic','Arial Narrow',sans-serif;font-weight:normal} .spin{transform-box:fill-box;transform-origin:center;animation:spin 24s linear infinite}.blink{animation:blink 3s ease-in-out infinite alternate}.bar{transform-box:fill-box;transform-origin:bottom;animation:bar 2.8s ease-in-out infinite alternate}@keyframes spin{to{transform:rotate(360deg)}}@keyframes blink{0%,30%{opacity:.35}70%,100%{opacity:1}}@keyframes bar{from{transform:scaleY(.35)}to{transform:scaleY(1)}}@media(prefers-reduced-motion:reduce){*{animation:none!important}}</style></head><body><svg id="s" viewBox="0 0 1080 1920" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><rect width="1080" height="1920" fill="black"/><g id="frame"/><g id="monitor"/></svg><script>const ns='http://www.w3.org/2000/svg', f=document.getElementById('frame'),m=document.getElementById('monitor'),colors=['#cc7766','#ffaa55','#9977cc','#cc99cc','#ffcc99'];function el(p,t,a,txt){let n=document.createElementNS(ns,t);for(let k in a)n.setAttribute(k,a[k]);if(txt)n.textContent=txt;p.append(n);return n}function rect(p,x,y,w,h,c,r=0){return el(p,'rect',{x,y,width:w,height:h,fill:c,rx:r})}function text(p,x,y,v,c='#000',size=18){return el(p,'text',{x,y,fill:c,'font-size':size},v)}function section(y,end,label,i){let c=colors[i%colors.length];el(f,'path',{d:`M20 ${y+56} Q20 ${y} 78 ${y} H158 V${y+34} Q120 ${y+34} 120 ${y+72} V${end-45} Q120 ${end-14} 158 ${end-14} H320 V${end} H78 Q20 ${end} 20 ${end-55}Z`,fill:c});let labelW=label.length*13+24;text(f,166,y+27,label,'#ffcc99',29);let start=166+labelW;rect(f,start,y,810-start,34,colors[2],0);for(let j=0;j<4;j++){let r=rect(f,820+j*59,y,49,34,colors[(i+j+1)%5],j===3?15:0);r.setAttribute('class','blink');r.style.animationDelay=`-${j*.7+i}s`}let yy=y+64,j=0;while(yy+38<end-55){let h=Math.min([42,60,36,78,48][j%5],end-55-yy);if(h<20)break;rect(f,20,yy,100,h,colors[(i+j+1)%5]);text(f,108,yy+h-8,String(4700+i*137+j*83),'#000',23).setAttribute('text-anchor','end');yy+=h+5;j++}rect(f,326,end-14,365,14,colors[2]);rect(f,697,end-14,155,14,colors[1]);rect(f,858,end-14,202,14,colors[3],7)}section(12,350,'CHRONOMETER',0);section(358,615,'ENVIRONMENT / FORECAST',2);section(623,1135,'ENERGY SYSTEMS',1);section(1143,1388,'SYSTEMS MONITOR',0);section(1396,1908,'PERSONNEL SCHEDULE',2);rect(f,155,1575,905,5,'#9977cc');for(let i=0;i<15;i++){let h=25+(i*37%95);let b=rect(m,165+i*13,1300-h,9,h,colors[i%5]);b.setAttribute('class','bar');b.style.animationDelay=`-${i*.37}s`}el(m,'path',{d:'M165 1345 Q190 1300 215 1345 T265 1345 T315 1345 T365 1345',stroke:colors[1],'stroke-width':3,fill:'none'});let g=el(m,'g',{});g.setAttribute('class','spin');for(let i=0;i<3;i++)el(g,'circle',{cx:490,cy:1270,r:35+i*22,fill:'none',stroke:colors[i+1],'stroke-width':13,'stroke-dasharray':`${20+i*12} 9`});for(let i=0;i<6;i++){rect(m,605,1205+i*24,100,13,'#302337',5);let b=rect(m,605,1205+i*24,30+i*11,13,colors[i%5],5);b.setAttribute('class','blink');b.style.animationDelay=`-${i*.51}s`;text(m,720,1217+i*24,String(182+i*97),colors[4],14)}for(let i=0;i<24;i++){let b=rect(m,800+i%6*30,1205+Math.floor(i/6)*30,22,20,colors[i%5],4);b.setAttribute('class','blink');b.style.animationDelay=`-${i*.43}s`}text(m,800,1355,'SYS 047 / DIAGNOSTICS',colors[3],22);for(let i=0;i<5;i++){el(m,'path',{d:`M160 ${1210+i*20} H365`,stroke:'#382d3b','stroke-width':1});}for(let i=0;i<6;i++){let n=text(m,378,1218+i*23,String(8214+i*137),colors[i%5],18);n.setAttribute('class','blink');n.style.animationDelay=`-${i*.83}s`}for(let i=0;i<4;i++){let n=rect(m,605+i*44,1360,39,10,colors[i],3);n.setAttribute('class','blink');n.style.animationDelay=`-${i*.4}s`}</script></body></html>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=League+Gothic&display=swap" rel="stylesheet">
+  <style>
+    html,body{margin:0;background:#000;width:100%;height:100%;overflow:hidden}
+    svg{width:100%;height:100%;display:block}
+    text{font-family:'League Gothic','Arial Narrow',sans-serif;font-weight:400;letter-spacing:.3px}
+    .softblink{animation:softblink 4.8s ease-in-out infinite alternate}
+    .softblink2{animation:softblink 6.2s ease-in-out infinite alternate}
+    .diagBar{transform-box:fill-box;transform-origin:left center;animation:barpulse 5.5s ease-in-out infinite alternate}
+    .monitorBar{transform-box:fill-box;transform-origin:bottom center;animation:barY 2.8s ease-in-out infinite alternate}
+    .spin{transform-box:fill-box;transform-origin:center center;animation:spin 26s linear infinite}
+    .pulseNode{animation:pulseNode 3s ease-in-out infinite}
+    .scanSweep{animation:sweep 7s ease-in-out infinite}
+    .tilePulse{animation:tilePulse 5s ease-in-out infinite}
+    .sidePulse{animation:sidePulse 7s ease-in-out infinite}
+    @keyframes softblink{0%,35%{opacity:.45}100%{opacity:1}}
+    @keyframes barpulse{0%{opacity:.45}100%{opacity:1}}
+    @keyframes barY{0%{transform:scaleY(.35)}100%{transform:scaleY(1)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes pulseNode{0%,100%{opacity:.6;r:6}50%{opacity:1;r:8}}
+    @keyframes sweep{0%,20%{opacity:0;transform:translateX(-18px)}25%,75%{opacity:.75}100%{opacity:0;transform:translateX(18px)}}
+    @keyframes tilePulse{0%,100%{opacity:.75}50%{opacity:1}}
+    @keyframes sidePulse{0%,85%,100%{filter:none;opacity:1}90%{filter:brightness(1.25);opacity:1}}
+    @media (prefers-reduced-motion: reduce){*{animation:none!important}}
+  </style>
+</head>
+<body>
+<svg viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <defs>
+    <clipPath id="chronoClip"><rect x="120" y="45" width="940" height="305" rx="42"/></clipPath>
+    <clipPath id="globeClip"><circle cx="894" cy="160" r="66"/></clipPath>
+  </defs>
+  <rect width="1080" height="1920" fill="#000"/>
+
+  <!-- outer section shells -->
+  <g id="frame">
+    <!-- Section helper path reused manually -->
+    <path d="M20 68 Q20 12 78 12 H158 V46 Q120 46 120 84 V305 Q120 336 158 336 H320 V350 H78 Q20 350 20 293 Z" fill="#c98776"/>
+    <path d="M20 414 Q20 358 78 358 H158 V392 Q120 392 120 430 V571 Q120 602 158 602 H320 V615 H78 Q20 615 20 558 Z" fill="#a184d6"/>
+    <path d="M20 679 Q20 623 78 623 H158 V657 Q120 657 120 695 V1091 Q120 1122 158 1122 H320 V1135 H78 Q20 1135 20 1078 Z" fill="#efb25a"/>
+    <path d="M20 1199 Q20 1143 78 1143 H158 V1177 Q120 1177 120 1215 V1344 Q120 1375 158 1375 H320 V1388 H78 Q20 1388 20 1331 Z" fill="#d18b79"/>
+    <path d="M20 1452 Q20 1396 78 1396 H158 V1430 Q120 1430 120 1468 V1864 Q120 1895 158 1895 H320 V1908 H78 Q20 1908 20 1851 Z" fill="#ab8ce2"/>
+
+    <!-- headers -->
+    <text x="166" y="29" fill="#000" font-size="33">CHRONOMETER</text>
+    <text x="166" y="392" fill="#000" font-size="33">ENVIRONMENT / FORECAST</text>
+    <text x="166" y="657" fill="#000" font-size="33">ENERGY SYSTEMS</text>
+    <text x="166" y="1177" fill="#000" font-size="33">SYSTEMS MONITOR</text>
+    <text x="166" y="1430" fill="#000" font-size="33">PERSONNEL SCHEDULE</text>
+
+    <!-- top header bars -->
+    <rect x="408" y="12" width="390" height="34" fill="#a184d6"/>
+    <rect x="808" y="12" width="66" height="34" fill="#efb25a" rx="8" class="softblink"/>
+    <rect x="882" y="12" width="58" height="34" fill="#ab8ce2" rx="8" class="softblink2"/>
+    <rect x="948" y="12" width="58" height="34" fill="#bb8fbd" rx="8" class="softblink" style="animation-delay:-1.2s"/>
+    <rect x="1014" y="12" width="52" height="34" fill="#dba588" rx="16" class="softblink2" style="animation-delay:-2.4s"/>
+
+    <rect x="455" y="358" width="440" height="34" fill="#a184d6"/>
+    <rect x="895" y="358" width="58" height="34" fill="#c89fca" rx="8" class="softblink"/>
+    <rect x="961" y="358" width="58" height="34" fill="#d2a5cf" rx="8" class="softblink2"/>
+    <rect x="1027" y="358" width="46" height="34" fill="#eeae44" rx="8" class="softblink" style="animation-delay:-1s"/>
+
+    <rect x="476" y="623" width="390" height="34" fill="#a184d6"/>
+    <rect x="874" y="623" width="58" height="34" fill="#ab8ce2" rx="8" class="softblink"/>
+    <rect x="940" y="623" width="58" height="34" fill="#caa7d0" rx="8" class="softblink2"/>
+    <rect x="1006" y="623" width="58" height="34" fill="#ffd7ac" rx="8" class="softblink" style="animation-delay:-1.2s"/>
+
+    <rect x="812" y="1143" width="58" height="34" fill="#efb25a" rx="8" class="softblink"/>
+    <rect x="878" y="1143" width="58" height="34" fill="#ab8ce2" rx="8" class="softblink2"/>
+    <rect x="944" y="1143" width="58" height="34" fill="#d2a5cf" rx="8" class="softblink" style="animation-delay:-1s"/>
+    <rect x="1010" y="1143" width="58" height="34" fill="#dba588" rx="16" class="softblink2" style="animation-delay:-2s"/>
+
+    <rect x="820" y="1396" width="58" height="34" fill="#d2a5cf" rx="8" class="softblink"/>
+    <rect x="886" y="1396" width="58" height="34" fill="#c8a1ce" rx="8" class="softblink2"/>
+    <rect x="952" y="1396" width="58" height="34" fill="#efb25a" rx="8" class="softblink" style="animation-delay:-1.3s"/>
+    <rect x="1018" y="1396" width="50" height="34" fill="#efb25a" rx="16" class="softblink2" style="animation-delay:-.7s"/>
+
+    <!-- left sidebar blocks with mixed colours -->
+    <g font-size="23" fill="#000" text-anchor="end">
+      <rect x="20" y="95" width="100" height="58" fill="#efb25a" class="sidePulse"/><text x="108" y="138">4700</text>
+      <rect x="20" y="158" width="100" height="76" fill="#ab8ce2" class="sidePulse" style="animation-delay:-1.3s"/><text x="108" y="215">4783</text>
+      <rect x="20" y="239" width="100" height="52" fill="#d19ba8" class="sidePulse" style="animation-delay:-2.2s"/><text x="108" y="275">4866</text>
+      <rect x="20" y="296" width="100" height="40" fill="#ffcc99" class="sidePulse" style="animation-delay:-3s"/><text x="108" y="324">4949</text>
+
+      <rect x="20" y="446" width="100" height="81" fill="#b093de" class="sidePulse"/><text x="108" y="507">4974</text>
+      <rect x="20" y="532" width="100" height="70" fill="#c49bcf" class="sidePulse" style="animation-delay:-1.5s"/><text x="108" y="577">5057</text>
+
+      <rect x="20" y="687" width="100" height="72" fill="#baa0e5" class="sidePulse"/><text x="108" y="737">4837</text>
+      <rect x="20" y="764" width="100" height="72" fill="#ffcc99" class="sidePulse" style="animation-delay:-1.1s"/><text x="108" y="814">4920</text>
+      <rect x="20" y="841" width="100" height="72" fill="#d69386" class="sidePulse" style="animation-delay:-2.1s"/><text x="108" y="891">5003</text>
+      <rect x="20" y="918" width="100" height="72" fill="#efb25a" class="sidePulse" style="animation-delay:-3.3s"/><text x="108" y="968">5086</text>
+      <rect x="20" y="995" width="100" height="72" fill="#aa8ad9" class="sidePulse" style="animation-delay:-.8s"/><text x="108" y="1045">5169</text>
+      <rect x="20" y="1072" width="100" height="50" fill="#efb25a" class="sidePulse" style="animation-delay:-2.8s"/><text x="108" y="1108">5252</text>
+
+      <rect x="20" y="1207" width="100" height="79" fill="#efb25a" class="sidePulse"/><text x="108" y="1261">4700</text>
+      <rect x="20" y="1291" width="100" height="84" fill="#ab8ce2" class="sidePulse" style="animation-delay:-1.4s"/><text x="108" y="1349">4783</text>
+
+      <rect x="20" y="1460" width="100" height="80" fill="#b194e0" class="sidePulse"/><text x="108" y="1515">4974</text>
+      <rect x="20" y="1545" width="100" height="84" fill="#c69fd2" class="sidePulse" style="animation-delay:-1.3s"/><text x="108" y="1604">5057</text>
+      <rect x="20" y="1634" width="100" height="84" fill="#e4af63" class="sidePulse" style="animation-delay:-2.1s"/><text x="108" y="1691">5140</text>
+      <rect x="20" y="1723" width="100" height="84" fill="#ae8ddd" class="sidePulse" style="animation-delay:-3s"/><text x="108" y="1781">5223</text>
+      <rect x="20" y="1812" width="100" height="50" fill="#cf8e83" class="sidePulse" style="animation-delay:-.9s"/><text x="108" y="1848">5306</text>
+      <rect x="20" y="1867" width="100" height="28" fill="#efb25a" class="sidePulse" style="animation-delay:-1.7s"/><text x="108" y="1888">5389</text>
+    </g>
+
+    <!-- bottom accent bars -->
+    <rect x="330" y="336" width="365" height="14" fill="#a184d6"/>
+    <rect x="695" y="336" width="130" height="14" fill="#efb25a"/>
+    <rect x="825" y="336" width="235" height="14" fill="#d8a28a" rx="7"/>
+    <rect x="330" y="601" width="325" height="14" fill="#a184d6"/>
+    <rect x="655" y="601" width="405" height="14" fill="#efb25a" rx="7"/>
+    <rect x="330" y="1122" width="325" height="14" fill="#a184d6"/>
+    <rect x="655" y="1122" width="405" height="14" fill="#efb25a" rx="7"/>
+    <rect x="330" y="1375" width="325" height="14" fill="#a184d6"/>
+    <rect x="655" y="1375" width="405" height="14" fill="#efb25a" rx="7"/>
+    <rect x="330" y="1894" width="325" height="14" fill="#a184d6"/>
+    <rect x="655" y="1894" width="180" height="14" fill="#efb25a"/>
+    <rect x="842" y="1894" width="218" height="14" fill="#d2a5cf" rx="7"/>
+  </g>
+
+  <!-- chronometer details -->
+  <g id="chrono">
+    <!-- brackets and small annotation -->
+    <path d="M145 110 V70 H225" stroke="#ffecbf" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M1004 110 V70 H970" stroke="#ffecbf" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M1004 255 V292 H970" stroke="#ffecbf" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <text x="175" y="180" fill="#cca2fb" font-size="24">047</text>
+    <text x="175" y="209" fill="#cca2fb" font-size="24">023</text>
+    <text x="175" y="238" fill="#cca2fb" font-size="24">729</text>
+    <path d="M212 210 H250 V242 H281" stroke="#ffecbf" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="282" cy="242" r="4" fill="#ffecbf"/>
+
+    <text id="timeText" x="290" y="198" fill="#ffcc99" font-size="146">5:27</text>
+    <text id="ampmText" x="610" y="198" fill="#ffcc99" font-size="76">PM</text>
+    <text id="dateText" x="291" y="273" fill="#b987ff" font-size="77">Friday 27 November</text>
+
+    <!-- mini globe -->
+    <g id="globeGroup" transform="translate(0,0)">
+      <circle cx="894" cy="160" r="66" fill="none" stroke="#ffcc99" stroke-width="4"/>
+      <g clip-path="url(#globeClip)">
+        <ellipse cx="894" cy="160" rx="58" ry="60" fill="#120812" stroke="#57395a" stroke-width="1.5"/>
+        <!-- simplified continents -->
+        <path d="M870 116 l10 -8 22 4 8 13 17 5 4 18 -9 18 -16 8 -3 12 -19 2 -16 -8 -10 -16 3 -19 -8 -9 4 -13 13 -7z" fill="#8c65a7" opacity="0.95"/>
+        <path d="M914 196 l18 -1 13 9 0 18 -10 13 -3 17 -7 14 -16 3 -9 -8 4 -14 0 -17 -8 -15 6 -12z" fill="#8c65a7" opacity="0.95"/>
+        <path d="M840 168 l17 -5 11 7 -1 10 -15 10 -15 -2 -4 -12z" fill="#8c65a7" opacity="0.95"/>
+        <path d="M829 147 l10 -3 9 2 -2 8 -10 4 -8 -4z" fill="#8c65a7" opacity="0.95"/>
+        <!-- grid -->
+        <ellipse cx="894" cy="160" rx="20" ry="60" fill="none" stroke="#ffcc99" stroke-width="1" opacity="0.7"/>
+        <ellipse cx="894" cy="160" rx="40" ry="60" fill="none" stroke="#ffcc99" stroke-width="1" opacity="0.7"/>
+        <ellipse cx="894" cy="160" rx="58" ry="60" fill="none" stroke="#ffcc99" stroke-width="1" opacity="0.7"/>
+        <ellipse cx="894" cy="132" rx="58" ry="15" fill="none" stroke="#ffcc99" stroke-width="1" opacity="0.7"/>
+        <ellipse cx="894" cy="160" rx="58" ry="22" fill="none" stroke="#ffcc99" stroke-width="1" opacity="0.7"/>
+        <ellipse cx="894" cy="188" rx="58" ry="15" fill="none" stroke="#ffcc99" stroke-width="1" opacity="0.7"/>
+        <rect x="826" y="154" width="136" height="10" fill="#d8a4ff" opacity="0.4" class="scanSweep"/>
+      </g>
+      <!-- callouts -->
+      <path d="M850 134 H796" stroke="#ffcc99" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="850" cy="134" r="6" fill="#efb25a" class="pulseNode"/>
+      <text x="732" y="121" fill="#ffcc99" font-size="15">SECTOR 001</text>
+      <text x="732" y="142" fill="#ffcc99" font-size="26">LOS ANGELES</text>
+
+      <path d="M836 185 H780" stroke="#ffcc99" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="836" cy="185" r="5" fill="#efb25a" class="pulseNode" style="animation-delay:-1s"/>
+      <text x="732" y="192" fill="#ffcc99" font-size="24">HAWAII</text>
+
+      <path d="M953 141 H1012" stroke="#ffcc99" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="953" cy="141" r="5" fill="#efb25a" class="pulseNode" style="animation-delay:-2s"/>
+      <text x="1020" y="148" fill="#ffcc99" font-size="24">LONDON</text>
+    </g>
+
+    <!-- progress labels -->
+    <path d="M146 292 V333 H175" stroke="#ffecbf" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="181" y="297" fill="#ffecbf" font-size="22">HOUR</text>
+    <text x="181" y="330" fill="#ffecbf" font-size="22">MINUTE</text>
+    <text x="181" y="363" fill="#ffecbf" font-size="22">SECOND</text>
+
+    <!-- bars -->
+    <g id="barGroup" transform="translate(0,0)">
+      <rect x="300" y="282" width="710" height="24" rx="12" fill="#5e4765"/>
+      <rect x="300" y="314" width="710" height="24" rx="12" fill="#5e4765"/>
+      <rect x="300" y="346" width="710" height="24" rx="12" fill="#5e4765"/>
+      <g id="hourBar"></g>
+      <g id="minuteBar"></g>
+      <g id="secondBar"></g>
+    </g>
+  </g>
+
+  <!-- systems monitor decoration -->
+  <g id="monitorDecor">
+    <!-- chart left -->
+    <g transform="translate(155,1175)">
+      <line x1="0" y1="125" x2="185" y2="125" stroke="#3f303f" stroke-width="1"/>
+      <line x1="0" y1="93" x2="185" y2="93" stroke="#3f303f" stroke-width="1"/>
+      <line x1="0" y1="61" x2="185" y2="61" stroke="#3f303f" stroke-width="1"/>
+      <line x1="0" y1="29" x2="185" y2="29" stroke="#3f303f" stroke-width="1"/>
+      <line x1="31" y1="0" x2="31" y2="126" stroke="#3f303f" stroke-width="1"/>
+      <line x1="62" y1="0" x2="62" y2="126" stroke="#3f303f" stroke-width="1"/>
+      <line x1="93" y1="0" x2="93" y2="126" stroke="#3f303f" stroke-width="1"/>
+      <line x1="124" y1="0" x2="124" y2="126" stroke="#3f303f" stroke-width="1"/>
+      <line x1="155" y1="0" x2="155" y2="126" stroke="#3f303f" stroke-width="1"/>
+      <g fill="#efb25a">
+        <rect class="monitorBar" x="6" y="98" width="9" height="27" fill="#efb25a"/>
+        <rect class="monitorBar" x="22" y="81" width="9" height="44" fill="#ab8ce2" style="animation-delay:-0.4s"/>
+        <rect class="monitorBar" x="38" y="56" width="9" height="69" fill="#d08d7f" style="animation-delay:-1s"/>
+        <rect class="monitorBar" x="54" y="89" width="9" height="36" fill="#c69fd2" style="animation-delay:-1.4s"/>
+        <rect class="monitorBar" x="70" y="65" width="9" height="60" fill="#efb25a" style="animation-delay:-0.8s"/>
+        <rect class="monitorBar" x="86" y="79" width="9" height="46" fill="#ab8ce2" style="animation-delay:-1.9s"/>
+        <rect class="monitorBar" x="102" y="45" width="9" height="80" fill="#efb25a" style="animation-delay:-0.6s"/>
+        <rect class="monitorBar" x="118" y="24" width="9" height="101" fill="#d08d7f" style="animation-delay:-1.3s"/>
+        <rect class="monitorBar" x="134" y="56" width="9" height="69" fill="#ab8ce2" style="animation-delay:-2.1s"/>
+        <rect class="monitorBar" x="150" y="35" width="9" height="90" fill="#ffcc99" style="animation-delay:-0.2s"/>
+      </g>
+      <path d="M10 147 Q32 119 54 147 T98 147 T142 147 T186 147" stroke="#efb25a" stroke-width="4" fill="none"/>
+    </g>
+
+    <!-- spinning target -->
+    <g class="spin">
+      <circle cx="490" cy="1268" r="74" fill="none" stroke="#ae8ddd" stroke-width="14" stroke-dasharray="48 12"/>
+      <circle cx="490" cy="1268" r="48" fill="none" stroke="#efb25a" stroke-width="13" stroke-dasharray="29 10"/>
+    </g>
+    <circle cx="490" cy="1268" r="18" fill="#000" stroke="#efb25a" stroke-width="10"/>
+
+    <!-- stat bars and matrix -->
+    <g>
+      <rect x="605" y="1207" width="124" height="13" rx="6" fill="#2c2230"/><rect class="diagBar" x="605" y="1207" width="42" height="13" rx="6" fill="#d99587"/>
+      <rect x="605" y="1234" width="124" height="13" rx="6" fill="#2c2230"/><rect class="diagBar" x="605" y="1234" width="55" height="13" rx="6" fill="#efb25a" style="animation-delay:-1s"/>
+      <rect x="605" y="1261" width="124" height="13" rx="6" fill="#2c2230"/><rect class="diagBar" x="605" y="1261" width="85" height="13" rx="6" fill="#c89fca" style="animation-delay:-2s"/>
+      <rect x="605" y="1288" width="124" height="13" rx="6" fill="#2c2230"/><rect class="diagBar" x="605" y="1288" width="66" height="13" rx="6" fill="#af8cdd" style="animation-delay:-3s"/>
+      <rect x="605" y="1315" width="124" height="13" rx="6" fill="#2c2230"/><rect class="diagBar" x="605" y="1315" width="92" height="13" rx="6" fill="#d6a390" style="animation-delay:-1.7s"/>
+      <text x="750" y="1218" fill="#ffcc99" font-size="18">182</text>
+      <text x="750" y="1245" fill="#ffcc99" font-size="18">279</text>
+      <text x="750" y="1272" fill="#ffcc99" font-size="18">376</text>
+      <text x="750" y="1299" fill="#ffcc99" font-size="18">473</text>
+      <text x="750" y="1326" fill="#ffcc99" font-size="18">570</text>
+
+      <g transform="translate(820,1199)">
+        <g>
+          <rect class="tilePulse" x="0" y="0" width="26" height="22" rx="4" fill="#d08d7f"/>
+          <rect class="tilePulse" x="38" y="0" width="26" height="22" rx="4" fill="#efb25a" style="animation-delay:-.4s"/>
+          <rect class="tilePulse" x="76" y="0" width="26" height="22" rx="4" fill="#ab8ce2" style="animation-delay:-.8s"/>
+          <rect class="tilePulse" x="114" y="0" width="26" height="22" rx="4" fill="#bb8fbd" style="animation-delay:-1.2s"/>
+          <rect class="tilePulse" x="152" y="0" width="26" height="22" rx="4" fill="#7b6548" style="animation-delay:-1.6s"/>
+          <rect class="tilePulse" x="190" y="0" width="26" height="22" rx="4" fill="#6d4c45" style="animation-delay:-2s"/>
+
+          <rect class="tilePulse" x="0" y="32" width="26" height="22" rx="4" fill="#765b3a" style="animation-delay:-1.1s"/>
+          <rect class="tilePulse" x="38" y="32" width="26" height="22" rx="4" fill="#5d4b3c" style="animation-delay:-.7s"/>
+          <rect class="tilePulse" x="76" y="32" width="26" height="22" rx="4" fill="#d2a5cf" style="animation-delay:-.3s"/>
+          <rect class="tilePulse" x="114" y="32" width="26" height="22" rx="4" fill="#ffcc99" style="animation-delay:-2.1s"/>
+          <rect class="tilePulse" x="152" y="32" width="26" height="22" rx="4" fill="#d6a390" style="animation-delay:-1.5s"/>
+          <rect class="tilePulse" x="190" y="32" width="26" height="22" rx="4" fill="#efb25a" style="animation-delay:-.9s"/>
+
+          <rect class="tilePulse" x="0" y="64" width="26" height="22" rx="4" fill="#ab8ce2" style="animation-delay:-.5s"/>
+          <rect class="tilePulse" x="38" y="64" width="26" height="22" rx="4" fill="#d2a5cf" style="animation-delay:-1.8s"/>
+          <rect class="tilePulse" x="76" y="64" width="26" height="22" rx="4" fill="#ffcc99" style="animation-delay:-.2s"/>
+          <rect class="tilePulse" x="114" y="64" width="26" height="22" rx="4" fill="#7e674c" style="animation-delay:-2.3s"/>
+          <rect class="tilePulse" x="152" y="64" width="26" height="22" rx="4" fill="#efb25a" style="animation-delay:-1.2s"/>
+          <rect class="tilePulse" x="190" y="64" width="26" height="22" rx="4" fill="#7a587d" style="animation-delay:-.6s"/>
+
+          <rect class="tilePulse" x="0" y="96" width="26" height="22" rx="4" fill="#94808d" style="animation-delay:-1.7s"/>
+          <rect class="tilePulse" x="38" y="96" width="26" height="22" rx="4" fill="#5f4e3f" style="animation-delay:-1.1s"/>
+          <rect class="tilePulse" x="76" y="96" width="26" height="22" rx="4" fill="#d08d7f" style="animation-delay:-.4s"/>
+          <rect class="tilePulse" x="114" y="96" width="26" height="22" rx="4" fill="#6a5038" style="animation-delay:-2s"/>
+          <rect class="tilePulse" x="152" y="96" width="26" height="22" rx="4" fill="#60455f" style="animation-delay:-1.4s"/>
+          <rect class="tilePulse" x="190" y="96" width="26" height="22" rx="4" fill="#ab8ce2" style="animation-delay:-.8s"/>
+        </g>
+      </g>
+      <text x="820" y="1355" fill="#b987ff" font-size="24">SYS 047 / DIAGNOSTICS</text>
+    </g>
+  </g>
+
+  <!-- schedule template lines -->
+  <g id="scheduleTemplate" stroke="#b987ff" stroke-width="3" fill="none">
+    <line x1="145" y1="1590" x2="1042" y2="1590"/>
+    <rect x="135" y="1618" width="910" height="280" stroke="#b987ff" stroke-width="2"/>
+    <line x1="270" y1="1618" x2="270" y2="1898" stroke-width="2"/>
+    <line x1="405" y1="1618" x2="405" y2="1898" stroke-width="2"/>
+    <line x1="540" y1="1618" x2="540" y2="1898" stroke-width="2"/>
+    <line x1="675" y1="1618" x2="675" y2="1898" stroke-width="2"/>
+    <line x1="810" y1="1618" x2="810" y2="1898" stroke-width="2"/>
+    <line x1="945" y1="1618" x2="945" y2="1898" stroke-width="2"/>
+    <line x1="135" y1="1688" x2="1045" y2="1688" stroke-width="2"/>
+    <line x1="135" y1="1758" x2="1045" y2="1758" stroke-width="2"/>
+    <line x1="135" y1="1828" x2="1045" y2="1828" stroke-width="2"/>
+  </g>
+</svg>
+<script>
+(function(){
+  const timeText=document.getElementById('timeText');
+  const ampmText=document.getElementById('ampmText');
+  const dateText=document.getElementById('dateText');
+  const hourBar=document.getElementById('hourBar');
+  const minuteBar=document.getElementById('minuteBar');
+  const secondBar=document.getElementById('secondBar');
+
+  function makeRect(x,y,w,h,fill,rx=0){
+    const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('x',x); r.setAttribute('y',y); r.setAttribute('width',w); r.setAttribute('height',h);
+    r.setAttribute('fill',fill); if(rx) r.setAttribute('rx',rx); return r;
+  }
+
+  function buildBars(now){
+    hourBar.innerHTML=''; minuteBar.innerHTML=''; secondBar.innerHTML='';
+    const hourProgress=(now.getHours()+now.getMinutes()/60)/24;
+    const minute=now.getMinutes();
+    const second=now.getSeconds();
+    // hour bar 12 chunky segments
+    const startX=300, y1=282, w=710, h=24;
+    const segW=(w-11*3)/12;
+    for(let i=0;i<12;i++){
+      const x=startX+i*(segW+3);
+      const fillFrac=Math.max(0, Math.min(1, hourProgress*12 - i));
+      const bg=makeRect(x,y1,segW,h,'#3d2f42',8); hourBar.appendChild(bg);
+      if(fillFrac>0){
+        const fg=makeRect(x,y1,Math.max(0,segW*fillFrac),h,i<9?'#efb25a':'#6a586f',8);
+        fg.setAttribute('class','diagBar'); fg.style.animationDelay=`-${i*.25}s`; hourBar.appendChild(fg);
+      }
+    }
+    // minute and second bars 60 cells each
+    function cellBar(group, y, count, activeCount, color){
+      const gap=2, cellW=(w-59*gap)/60;
+      for(let i=0;i<60;i++){
+        const x=startX+i*(cellW+gap);
+        const bg=makeRect(x,y,cellW,h,'#2d2332',4); group.appendChild(bg);
+        if(i<activeCount){
+          const fg=makeRect(x,y,cellW,h,color,4);
+          fg.setAttribute('class','diagBar'); fg.style.animationDelay=`-${i*.05}s`; group.appendChild(fg);
+        }
+      }
+    }
+    cellBar(minuteBar,314,60,minute,'#c8a1f2');
+    cellBar(secondBar,346,60,second,'#a57ecc');
+  }
+
+  function updateClock(){
+    const now=new Date();
+    let h=now.getHours(); const m=String(now.getMinutes()).padStart(2,'0');
+    const ampm=h>=12?'PM':'AM';
+    h=h%12; if(h===0) h=12;
+    timeText.textContent=`${h}:${m}`;
+    const digits=String(h).length + 1 + 2; // rough offset
+    ampmText.setAttribute('x', h<10? 595 : 640);
+    ampmText.textContent=ampm;
+    const date=new Intl.DateTimeFormat('en-GB',{weekday:'long',day:'numeric',month:'long'}).format(now);
+    dateText.textContent=date.replace(/^(.)/,c=>c.toUpperCase());
+    buildBars(now);
+  }
+  updateClock(); setInterval(updateClock,1000);
+})();
+</script>
+</body>
+</html>
